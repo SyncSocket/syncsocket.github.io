@@ -9,7 +9,7 @@
 title: SyncSocket
 email: syncsocketdev@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  True time synchronous messaging application server 
+  True time synchronous messaging application server
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://syncsocket.github.io" # the base hostname & protocol for your site
 twitter_username: sync_socket
@@ -17,3 +17,8 @@ github_username:  SyncSocket
 
 # Build settings
 markdown: kramdown
+
+collections:
+  docs:
+    output: true
+    permalink: /docs/:path/

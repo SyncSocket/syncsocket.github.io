@@ -280,6 +280,7 @@ request.send();
 ```
 
 This code does the following.
+
 1. It creates an AudioContext, which is required for playing sounds via WebAudio API.
 2. Creates a BufferSource, which is a chunk of memory into which we will load our audio data.
 3. Issues a request to fetch an MP3 file which we are going to play.
