@@ -51,9 +51,10 @@ http.listen(3000, function(){
 ```
 
 Let's see what the code does.
-1. It declares variable `app` to handle HTTP requests to the app.
-2. Defines a GET request handler for path `/` that will send HTML `<h1>Hello world</h1>` to requesting user
-3. Instructs the HTTP server to listen for incoming requests on port 3000
+
+1.  It declares variable `app` to handle HTTP requests to the app.
+2.  Defines a GET request handler for path `/` that will send HTML `<h1>Hello world</h1>` to requesting user
+3.  Instructs the HTTP server to listen for incoming requests on port 3000
 
 You can run the app by typing `node index.js` and you should see a message that server is listening on port 3000.
 Then in your browser type [http://localhost:3000](http://localhost:3000) and you should see the Hello World message displayed
@@ -97,8 +98,9 @@ Now restart the server (by hitting Control-C and typing `node index.js` again) a
 ### Integrating SyncSocket
 
 SyncSocket framework consists of two parts:
-1. The server part handles all messages and syncs devices: `syncsocket`
-2. The client, that connects to server and can send and receive messages: `syncsocket-client`
+
+1.  The server part handles all messages and syncs devices: `syncsocket`
+2.  The client, that connects to server and can send and receive messages: `syncsocket-client`
 
 First let's integrate SyncSocket server to our app. We need to install it
 
@@ -117,9 +119,10 @@ syncsocketSrv.listen(6024);
 ```
 
 This code:
-1. Creates SyncSocket server object
-2. Creates a channel with id `my-audio-system` that your clients will join. A channel is like a radio station: when you send a message to channel, all connected clients will receive this message synchronously
-3. Instructs SyncSocket server to listen for clients on port `6024`.
+
+1.  Creates SyncSocket server object
+2.  Creates a channel with id `my-audio-system` that your clients will join. A channel is like a radio station: when you send a message to channel, all connected clients will receive this message synchronously
+3.  Instructs SyncSocket server to listen for clients on port `6024`.
 
 Second, lets integrate SyncSocket-client into our website code.
 
