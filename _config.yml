@@ -21,4 +21,3 @@ markdown: kramdown
 collections:
   docs:
     output: true
-    permalink: /docs/:path/
