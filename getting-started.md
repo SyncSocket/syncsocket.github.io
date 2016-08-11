@@ -101,11 +101,13 @@ SyncSocket framework consists of two parts:
 2. The client, that connects to server and can send and receive messages: `syncsocket-client`
 
 First let's integrate SyncSocket server to our app. We need to install it
+
 ```
 npm install syncsocket --save
 ```
 
 Now let's setup our SyncSocket server to run besides the web server. Add the following to `index.js`
+
 ```js
 var SyncSocket = require('syncsocket');
 
@@ -120,11 +122,13 @@ This code:
 3. Instructs SyncSocket server to listen for clients on port `6024`.
 
 Second, lets integrate SyncSocket-client into our website code.
+
 ```
 npm install syncsocket-client --save
 ```
 
 The client is now installed into `node_moules/syncsocket-client` folder. Now we need to make our web server to serve the SyncSocket client script besides HTML. So add another handler to `index.js`
+
 ```js
 app.get('/syncsocket-client.js', function (req, res) {
     res.sendFile(__dirname + '/node_modules/syncsocket-client/syncsocket.js')
@@ -132,6 +136,7 @@ app.get('/syncsocket-client.js', function (req, res) {
 ```
 
 Also we wish to know when a new client connects to our server. We can use `connected` event for that: it will fire executing the handler every time someone connects. Let's add it to `index.js`
+
 ```js
 syncsocketSrv.on('connection', function () {
     console.log('a new client connected');
@@ -139,6 +144,7 @@ syncsocketSrv.on('connection', function () {
 ```
 
 Don't forget to restart the server to make changes effective. Next step is to use the client to connect to our server. Add the following to `index.html`
+
 ```html
 <script src="/syncsocket-client.js"></script>
 <script>
@@ -151,6 +157,7 @@ Now try to refresh the page a couple of times. You should see the messages about
 ![Clients connect]({{ site.url }}/assets/srv-client-connected.png)
 
 There is also another event that fires when a client disconnects. Add this to `index.js`
+
 ```js
 syncsocketSrv.on('disconnect', function () {
     console.log('client disconnected');
@@ -164,6 +171,7 @@ Now restart server and refresh page a couple of times. You should see something 
 ### Joining a channel
 
 Remember we created a channel that works like radio station? Now let client join that channel. Edit `index.html` to add new instructions
+
 ```html
 <script>
     var client = syncsocket('http://localhost:6024');
@@ -196,6 +204,7 @@ we may want to preload the music, pre-fill audio buffer, i.e. do everything we c
 Second callback is when you actually need to execute event that you've prepared in first callback.
 
 Now let's change our `index.html` to try out this publish-subscribe mechanism
+
 ```html
 <script>
         function setMessage(message) {
@@ -280,6 +289,7 @@ This will pause the preparing process until `channel.finalizeTransition` is call
 it after we've loaded and decoded data, etc). This pattern can be really helpful for asynchronous operations (just as we have here with HTTP request). If we omit these two calls, then client will finish preparation just after the request to fetch audio is sent, and may get into situation when `play` event is fired, but music is not yet loaded.
 
 Now let's change the fire callback
+
 ```js
 source.start(0);
 setMessage("playing music");
@@ -291,9 +301,13 @@ Now if we open two browser windows side-by-side and hit `Play`, we should hear s
 ### Homework problems
 
 +   Make `Stop` button work. Clicking it should make all playing browsers to pause music at the same time.
++   Let user to choose among two or three audio files to play. When publishing `play` message, pass along some data that will identify the choice. Don't use different message topics, use extra data.
 +   Use another computer instead of second browser window to serve as speaker in your multi-room system. **Hint**: by default, clients attempt to connect and synchronize with `localhost`. This works on your local machine, but for remote clients it would not. You need to determine your machine's IP, and then pass it to server constructor spec as defaultTimeserver with port 5579 (e.g. `var syncsocketSrv = SyncSocket({ defaultTimeserver: 'http://192.168.1.28:5579' })`). Also you'll need to change the URI the clients connect to -- use port 6024 (e.g. `var client = syncsocket('http://192.168.1.28:6024')`)
 
 ### Getting example source code
 
 Head over to the [GitHub repo](https://github.com/woyorus/multiroom-audio-example), or
-`git clone https://github.com/woyorus/multiroom-audio-example.git`
+
+```shell
+git clone https://github.com/woyorus/multiroom-audio-example.git
+```
