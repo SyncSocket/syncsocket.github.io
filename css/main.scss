@@ -3,9 +3,16 @@
 ---
 @charset "utf-8";
 
-#github-star-button {
+#github-star {
     margin-top: 18px;
     margin-left: 20px;
+    display: inline-block;
+}
+
+@media screen and (max-width: 600px) {
+    #github-forkme {
+        visibility: hidden;
+    }
 }
 
 
