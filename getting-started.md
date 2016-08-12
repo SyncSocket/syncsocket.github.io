@@ -41,12 +41,12 @@ Now express is installed and we can start writing code for our app. Create file 
 var app = require('express')();
 var http = require('http').Server(app);
 
-app.get('/', function(req, res){
-  res.send('<h1>Hello world</h1>');
-});
-
 http.listen(3000, function(){
   console.log('listening on *:3000');
+});
+
+app.get('/', function(req, res){
+  res.send('<h1>Hello world</h1>');
 });
 ```
 
@@ -108,40 +108,29 @@ First let's integrate SyncSocket server to our app. We need to install it
 npm install syncsocket --save
 ```
 
-Now let's setup our SyncSocket server to run besides the web server. Add the following to `index.js`
+Now let's attach SyncSocket to our existing HTTP server, so they will run in parallel. Edit `index.js` to look like this:
 
 ```js
+var app = require('express')();
+var http = require('http').Server(app);
 var SyncSocket = require('syncsocket');
 
-var syncsocketSrv = SyncSocket();
-syncsocketSrv.createChannel({ channelId: 'myAudioSystem' });
-syncsocketSrv.listen(6024);
+var srv = SyncSocket(http, { embeddedTimeserver: true });
+srv.createChannel('myAudioSystem');
+
+http.listen(3000, // ... continues
 ```
 
 This code:
 
-1.  Creates SyncSocket server object
-2.  Creates a channel with id `my-audio-system` that your clients will join. A channel is like a radio station: when you send a message to channel, all connected clients will receive this message synchronously
-3.  Instructs SyncSocket server to listen for clients on port `6024`.
+1.  Creates a new SyncSocket server and attaches it to our `http` server.
+2.  Since we pass `embeddedTimeserver: true` as the parameter, SyncSocket server will also allow clients to synchronize time with  
+3.  Creates a channel with id `myAudioSystem` that your clients will join. A channel is like a radio station: when you send a message to channel, all connected clients will receive this message synchronously
 
-Second, lets integrate SyncSocket-client into our website code.
-
-```
-npm install syncsocket-client --save
-```
-
-The client is now installed into `node_moules/syncsocket-client` folder. Now we need to make our web server to serve the SyncSocket client script besides HTML. So add another handler to `index.js`
+Also we wish to know when a new client connects to our server. We can use `connected` event for that: it will fire very time someone connects. Let's add it to `index.js`
 
 ```js
-app.get('/syncsocket-client.js', function (req, res) {
-    res.sendFile(__dirname + '/node_modules/syncsocket-client/syncsocket.js')
-});
-```
-
-Also we wish to know when a new client connects to our server. We can use `connected` event for that: it will fire executing the handler every time someone connects. Let's add it to `index.js`
-
-```js
-syncsocketSrv.on('connection', function () {
+srv.on('connection', function () {
     console.log('a new client connected');
 });
 ```
@@ -149,12 +138,13 @@ syncsocketSrv.on('connection', function () {
 Don't forget to restart the server to make changes effective. Next step is to use the client to connect to our server. Add the following to `index.html`
 
 ```html
-<script src="/syncsocket-client.js"></script>
+<script src="/syncsocket/syncsocket.js"></script>
 <script>
-    var client = syncsocket('http://localhost:6024');
+    var client = syncsocket('http://localhost:3000');
 </script>
 ```
 
+Notice that server can conviniently serve the client source code, however, in production environment a CDN with client code would be a better choice. 
 Now try to refresh the page a couple of times. You should see the messages about new clients connected in the server window:
 
 ![Clients connect]({{ site.url }}/assets/srv-client-connected.png)
@@ -162,7 +152,7 @@ Now try to refresh the page a couple of times. You should see the messages about
 There is also another event that fires when a client disconnects. Add this to `index.js`
 
 ```js
-syncsocketSrv.on('disconnect', function () {
+srv.on('disconnect', function () {
     console.log('client disconnected');
 });
 ```
@@ -177,7 +167,7 @@ Remember we created a channel that works like radio station? Now let client join
 
 ```html
 <script>
-    var client = syncsocket('http://localhost:6024');
+    var client = syncsocket('http://localhost:3000/');
     client.on('connected', function () {
         client.joinChannel('myAudioSystem')
             .then(function (channel) {
@@ -213,7 +203,7 @@ Now let's change our `index.html` to try out this publish-subscribe mechanism
         function setMessage(message) {
             document.getElementById('message').innerHTML = message;
         }
-        var client = syncsocket('http://localhost:6024');
+        var client = syncsocket('http://localhost:3000');
         client.on('connected', function () {
             client.joinChannel('myAudioSystem', true)
                     .then(function (channel) {
@@ -306,7 +296,7 @@ Now if we open two browser windows side-by-side and hit `Play`, we should hear s
 
 +   Make `Stop` button work. Clicking it should make all playing browsers to pause music at the same time.
 +   Let user to choose among two or three audio files to play. When publishing `play` message, pass along some data that will identify the choice. Don't use different message topics, use extra data.
-+   Use another computer instead of second browser window to serve as speaker in your multi-room system. **Hint**: by default, clients attempt to connect and synchronize with `localhost`. This works on your local machine, but for remote clients it would not. You need to determine your machine's IP, and then pass it to server constructor spec as defaultTimeserver with port 5579 (e.g. `var syncsocketSrv = SyncSocket({ defaultTimeserver: 'http://192.168.1.28:5579' })`). Also you'll need to change the URI the clients connect to -- use port 6024 (e.g. `var client = syncsocket('http://192.168.1.28:6024')`)
++   Use another computer instead of second browser window to serve as speaker in your multi-room system. **Hint**: by default, clients attempt to connect and synchronize with `localhost`. This works on your local machine, but for remote clients it would not. You need to determine your machine's IP, and then pass it to server constructor spec as `timeserverHost`. Also you'll need to change the URI the clients connect to — again, use your machine's IP instead of `localhost`.
 
 ### Getting example source code
 
